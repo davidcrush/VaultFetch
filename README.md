@@ -73,7 +73,8 @@ VaultFetch is a local media downloader built with Laravel. Paste a supported vid
 | `YT_DLP_PROBE_TIMEOUT` | Metadata probe timeout (seconds) | `30` |
 | `YT_DLP_DOWNLOAD_TIMEOUT` | Download timeout (seconds) | `600` |
 | `YT_DLP_RETENTION_DAYS` | Days to keep files on disk | `7` |
-| `YT_DLP_COOKIES_FILE` | Optional cookies file for yt-dlp | — |
+| `YT_DLP_COOKIES_FILE` | Optional Netscape cookies file for yt-dlp | — |
+| `YT_DLP_PROXY` | Optional HTTP/HTTPS/SOCKS proxy for yt-dlp (e.g. `socks5://127.0.0.1:1080`) | — |
 
 Allowed hosts are defined in [`config/vaultfetch.php`](config/vaultfetch.php).
 

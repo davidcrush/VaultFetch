@@ -16,6 +16,8 @@ return [
 
     'cookies_file' => env('YT_DLP_COOKIES_FILE'),
 
+    'proxy' => env('YT_DLP_PROXY'),
+
     'allowed_hosts' => [
         'youtube.com',
         'www.youtube.com',

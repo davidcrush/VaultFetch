@@ -101,9 +101,22 @@ class YtDlpService
 
         $cookies = config('vaultfetch.cookies_file');
 
-        if (is_string($cookies) && $cookies !== '' && file_exists($cookies)) {
-            $command[] = '--cookies';
-            $command[] = $cookies;
+        if (is_string($cookies) && $cookies !== '') {
+            if (file_exists($cookies)) {
+                $command[] = '--cookies';
+                $command[] = $cookies;
+            } else {
+                Log::warning('yt-dlp cookies file configured but not found', [
+                    'path' => $cookies,
+                ]);
+            }
+        }
+
+        $proxy = config('vaultfetch.proxy');
+
+        if (is_string($proxy) && $proxy !== '') {
+            $command[] = '--proxy';
+            $command[] = $proxy;
         }
 
         return array_merge($command, $args);

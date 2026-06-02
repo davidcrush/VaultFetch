@@ -76,4 +76,28 @@ class YtDlpServiceTest extends TestCase
 
         $this->assertSame('downloads/video99.mp4', $path);
     }
+
+    public function test_probe_passes_proxy_when_configured(): void
+    {
+        config(['vaultfetch.proxy' => 'socks5://127.0.0.1:1080']);
+
+        Process::fake([
+            '*' => Process::result(
+                output: json_encode([
+                    'id' => 'abc123xyz00',
+                    'title' => 'Sample Video',
+                    'duration' => 125,
+                ]),
+            ),
+        ]);
+
+        app(YtDlpService::class)->probe('https://www.youtube.com/watch?v=abc123xyz00');
+
+        Process::assertRan(function ($process): bool {
+            $command = $process->command;
+
+            return in_array('--proxy', $command, true)
+                && in_array('socks5://127.0.0.1:1080', $command, true);
+        });
+    }
 }
