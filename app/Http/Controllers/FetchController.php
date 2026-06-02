@@ -35,6 +35,6 @@ class FetchController extends Controller
 
         return redirect()
             ->route('home')
-            ->with('status', 'Download queued for "'.$metadata->title.'".');
+            ->with('status', __('vaultfetch.messages.download_queued', ['title' => $metadata->title]));
     }
 }

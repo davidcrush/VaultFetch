@@ -41,7 +41,7 @@ class DownloadVideoJob implements ShouldQueue
     {
         $this->download->update([
             'status' => DownloadStatus::Failed,
-            'error_message' => $exception?->getMessage() ?? 'Download failed.',
+            'error_message' => $exception?->getMessage() ?? __('vaultfetch.messages.job_failed'),
         ]);
     }
 }

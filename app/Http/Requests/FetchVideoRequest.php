@@ -36,7 +36,7 @@ class FetchVideoRequest extends FormRequest
             if (! is_string($host) || ! $this->isAllowedHost($host)) {
                 $validator->errors()->add(
                     'url',
-                    'Only supported video hosts are allowed.',
+                    __('vaultfetch.validation.unsupported_host'),
                 );
             }
         });

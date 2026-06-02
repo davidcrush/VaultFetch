@@ -6,7 +6,7 @@
             <div class="mx-auto flex max-w-4xl justify-center px-4 sm:px-6">
                 <img
                     src="{{ asset('images/logo-horizontal.png') }}"
-                    alt="VaultFetch — Local Media Downloader"
+                    alt="{{ __('vaultfetch.app.logo_alt') }}"
                     class="h-auto w-full max-w-3xl"
                 />
             </div>
@@ -16,7 +16,7 @@
             <main class="flex-1">
                 <div class="mx-auto max-w-md rounded-xl bg-white p-6 shadow-md sm:p-8">
                     <h2 class="mb-6 text-center text-lg font-medium text-gray-800">
-                        Sign in
+                        {{ __('vaultfetch.auth.sign_in') }}
                     </h2>
 
                     @if ($errors->any())
@@ -34,7 +34,7 @@
 
                         <div>
                             <label for="email" class="mb-1 block text-sm font-medium text-gray-700">
-                                Email
+                                {{ __('vaultfetch.auth.email') }}
                             </label>
                             <input
                                 id="email"
@@ -50,7 +50,7 @@
 
                         <div>
                             <label for="password" class="mb-1 block text-sm font-medium text-gray-700">
-                                Password
+                                {{ __('vaultfetch.auth.password') }}
                             </label>
                             <input
                                 id="password"
@@ -72,7 +72,7 @@
                                 class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
                             <label for="remember" class="text-sm text-gray-600">
-                                Remember me
+                                {{ __('vaultfetch.auth.remember_me') }}
                             </label>
                         </div>
 
@@ -80,7 +80,7 @@
                             type="submit"
                             class="w-full rounded-md bg-blue-600 px-6 py-2.5 font-medium text-white transition hover:bg-blue-700"
                         >
-                            Sign in
+                            {{ __('vaultfetch.auth.sign_in') }}
                         </button>
                     </form>
                 </div>

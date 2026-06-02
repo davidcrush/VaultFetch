@@ -68,7 +68,7 @@ class Download extends Model
         $seconds = $this->duration_seconds ?? 0;
 
         if ($seconds <= 0) {
-            return '—';
+            return __('vaultfetch.duration.empty');
         }
 
         $hours = intdiv($seconds, 3600);
@@ -78,15 +78,15 @@ class Download extends Model
         $parts = [];
 
         if ($hours > 0) {
-            $parts[] = $hours.' '.($hours === 1 ? 'hour' : 'hours');
+            $parts[] = trans_choice('vaultfetch.duration.hour', $hours, ['count' => $hours]);
         }
 
         if ($minutes > 0) {
-            $parts[] = $minutes.' '.($minutes === 1 ? 'minute' : 'minutes');
+            $parts[] = trans_choice('vaultfetch.duration.minute', $minutes, ['count' => $minutes]);
         }
 
         if ($parts === [] && $remainingSeconds > 0) {
-            $parts[] = $remainingSeconds.' '.($remainingSeconds === 1 ? 'second' : 'seconds');
+            $parts[] = trans_choice('vaultfetch.duration.second', $remainingSeconds, ['count' => $remainingSeconds]);
         }
 
         return implode(' ', $parts);
@@ -116,7 +116,7 @@ class Download extends Model
         $expiresAt = $this->expiresAt();
 
         if ($expiresAt === null) {
-            return '—';
+            return __('vaultfetch.duration.empty');
         }
 
         return $expiresAt->format('M j, Y g:i A');

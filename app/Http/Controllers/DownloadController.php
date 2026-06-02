@@ -17,7 +17,7 @@ class DownloadController extends Controller
         if (! $download->isFileAvailable()) {
             return redirect()
                 ->route('home')
-                ->withErrors(['download' => 'This file is not available yet.']);
+                ->withErrors(['download' => __('vaultfetch.messages.file_not_available')]);
         }
 
         return view('downloads.show', [
@@ -30,7 +30,7 @@ class DownloadController extends Controller
         if (! $download->isFileAvailable()) {
             return redirect()
                 ->route('home')
-                ->withErrors(['download' => 'This file is not available yet.']);
+                ->withErrors(['download' => __('vaultfetch.messages.file_not_available')]);
         }
 
         return Storage::disk('local')->response(
@@ -48,7 +48,7 @@ class DownloadController extends Controller
         if (! $download->isFileAvailable()) {
             return redirect()
                 ->route('home')
-                ->withErrors(['download' => 'This file is not available yet.']);
+                ->withErrors(['download' => __('vaultfetch.messages.file_not_available')]);
         }
 
         return Storage::disk('local')->download(
@@ -62,7 +62,7 @@ class DownloadController extends Controller
         if (! $download->canRefetch()) {
             return redirect()
                 ->route('home')
-                ->withErrors(['download' => 'This download cannot be refetched.']);
+                ->withErrors(['download' => __('vaultfetch.messages.cannot_refetch')]);
         }
 
         $download->update([
@@ -75,6 +75,6 @@ class DownloadController extends Controller
 
         return redirect()
             ->route('home')
-            ->with('status', 'Re-download queued for "'.$download->title.'".');
+            ->with('status', __('vaultfetch.messages.refetch_queued', ['title' => $download->title]));
     }
 }

@@ -6,7 +6,7 @@
             <div class="mx-auto flex max-w-4xl flex-col items-center gap-4 px-4 sm:px-6">
                 <img
                     src="{{ asset('images/logo-horizontal.png') }}"
-                    alt="VaultFetch — Local Media Downloader"
+                    alt="{{ __('vaultfetch.app.logo_alt') }}"
                     class="h-auto w-full max-w-3xl"
                 />
                 <form action="{{ route('logout') }}" method="post" class="self-end">
@@ -15,7 +15,7 @@
                         type="submit"
                         class="text-sm text-gray-500 transition hover:text-gray-800"
                     >
-                        Sign out
+                        {{ __('vaultfetch.auth.sign_out') }}
                     </button>
                 </form>
             </div>
@@ -42,7 +42,7 @@
 
                     <section class="mb-10">
                         <h2 class="mb-4 text-lg font-medium text-gray-800">
-                            Enter Video URL
+                            {{ __('vaultfetch.home.enter_video_url') }}
                         </h2>
                         <form
                             id="fetch-form"
@@ -56,7 +56,7 @@
                                 type="url"
                                 name="url"
                                 value="{{ old('url') }}"
-                                placeholder="https://www.youtube.com/watch?v=..."
+                                placeholder="{{ __('vaultfetch.home.url_placeholder') }}"
                                 required
                                 class="min-w-0 flex-1 rounded-md border border-gray-300 px-4 py-2.5 text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 read-only:cursor-not-allowed read-only:bg-gray-50"
                             />
@@ -65,7 +65,7 @@
                                 type="submit"
                                 class="inline-flex min-w-[7rem] shrink-0 items-center justify-center gap-2 rounded-md bg-blue-600 px-6 py-2.5 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:px-8"
                             >
-                                <span id="fetch-submit-label">Fetch</span>
+                                <span id="fetch-submit-label">{{ __('vaultfetch.home.fetch') }}</span>
                                 <span id="fetch-submit-loading" class="hidden items-center gap-2">
                                     <svg
                                         class="h-4 w-4 animate-spin"
@@ -88,7 +88,7 @@
                                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                         />
                                     </svg>
-                                    Fetching…
+                                    {{ __('vaultfetch.home.fetching') }}
                                 </span>
                             </button>
                         </form>
@@ -96,10 +96,10 @@
 
                     <section>
                         <h2 class="text-lg font-medium text-gray-800">
-                            Recent Downloads
+                            {{ __('vaultfetch.home.recent_downloads') }}
                         </h2>
                         <p class="mt-1 text-sm text-gray-500">
-                            Last {{ config('vaultfetch.recent_limit') }} videos fetched
+                            {{ __('vaultfetch.home.recent_downloads_subtitle', ['count' => config('vaultfetch.recent_limit')]) }}
                         </p>
 
                         <div class="mt-4 space-y-4">
@@ -107,7 +107,7 @@
                                 <x-download-row :download="$download" />
                             @empty
                                 <p class="py-8 text-center text-sm text-gray-500">
-                                    No downloads yet. Paste a URL above to fetch your first video.
+                                    {{ __('vaultfetch.home.no_downloads') }}
                                 </p>
                             @endforelse
                         </div>

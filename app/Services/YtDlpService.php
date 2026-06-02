@@ -27,7 +27,7 @@ class YtDlpService
             ]);
 
             throw new YtDlpException(
-                'Unable to fetch video metadata.',
+                __('vaultfetch.messages.metadata_unavailable'),
                 $result->errorOutput(),
             );
         }
@@ -36,7 +36,7 @@ class YtDlpService
         $data = json_decode($result->output(), true);
 
         if (! is_array($data) || ! isset($data['id'], $data['title'])) {
-            throw new YtDlpException('Invalid metadata response from yt-dlp.');
+            throw new YtDlpException(__('vaultfetch.messages.invalid_metadata'));
         }
 
         return new VideoMetadata(
@@ -75,7 +75,7 @@ class YtDlpService
             ]);
 
             throw new YtDlpException(
-                'Video download failed.',
+                __('vaultfetch.messages.download_failed'),
                 $result->errorOutput(),
             );
         }
@@ -83,7 +83,7 @@ class YtDlpService
         $files = glob(Storage::disk('local')->path($outputDir.'/'.$externalId.'.*'));
 
         if ($files === false || $files === []) {
-            throw new YtDlpException('Download finished but no output file was found.');
+            throw new YtDlpException(__('vaultfetch.messages.output_not_found'));
         }
 
         $absolutePath = $files[0];
