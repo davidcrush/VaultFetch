@@ -137,4 +137,40 @@ class YtDlpServiceTest extends TestCase
         $this->assertStringContainsString('http://proxyuser:***@proxy.example:8080', $commandLog['context']['command']);
         $this->assertStringNotContainsString('secretpass', $commandLog['context']['command']);
     }
+
+    public function test_probe_logs_process_output_on_failure(): void
+    {
+        $logged = [];
+        Log::listen(function (MessageLogged $event) use (&$logged): void {
+            $logged[] = [
+                'level' => $event->level,
+                'message' => $event->message,
+                'context' => $event->context,
+            ];
+        });
+
+        Process::fake([
+            '*' => Process::result(
+                output: 'partial stdout',
+                errorOutput: 'ERROR: unable to download',
+                exitCode: 1,
+            ),
+        ]);
+
+        try {
+            app(YtDlpService::class)->probe('https://www.youtube.com/watch?v=abc123xyz00');
+        } catch (YtDlpException) {
+        }
+
+        $outputLog = collect($logged)->first(
+            fn (array $entry): bool => $entry['message'] === 'yt-dlp output',
+        );
+
+        $this->assertNotNull($outputLog);
+        $this->assertSame('warning', $outputLog['level']);
+        $this->assertSame(1, $outputLog['context']['exit_code']);
+        $this->assertSame('partial stdout', rtrim($outputLog['context']['stdout']));
+        $this->assertSame('ERROR: unable to download', rtrim($outputLog['context']['stderr']));
+        $this->assertSame('https://www.youtube.com/watch?v=abc123xyz00', $outputLog['context']['url']);
+    }
 }

@@ -18,14 +18,9 @@ class YtDlpService
             '--no-playlist',
             '-J',
             $url,
-        ], config('vaultfetch.probe_timeout'));
+        ], config('vaultfetch.probe_timeout'), ['url' => $url]);
 
         if (! $result->successful()) {
-            Log::warning('yt-dlp probe failed', [
-                'exit_code' => $result->exitCode(),
-                'url' => $url,
-            ]);
-
             throw new YtDlpException(
                 __('vaultfetch.messages.metadata_unavailable'),
                 $result->errorOutput(),
@@ -36,6 +31,11 @@ class YtDlpService
         $data = json_decode($result->output(), true);
 
         if (! is_array($data) || ! isset($data['id'], $data['title'])) {
+            Log::warning('yt-dlp probe returned invalid metadata', [
+                'url' => $url,
+                'stdout' => $result->output(),
+            ]);
+
             throw new YtDlpException(__('vaultfetch.messages.invalid_metadata'));
         }
 
@@ -65,14 +65,12 @@ class YtDlpService
             '--merge-output-format', config('vaultfetch.merge_output_format'),
             '-o', $outputTemplate,
             $url,
-        ], config('vaultfetch.download_timeout'));
+        ], config('vaultfetch.download_timeout'), [
+            'url' => $url,
+            'external_id' => $externalId,
+        ]);
 
         if (! $result->successful()) {
-            Log::warning('yt-dlp download failed', [
-                'exit_code' => $result->exitCode(),
-                'external_id' => $externalId,
-            ]);
-
             throw new YtDlpException(
                 __('vaultfetch.messages.download_failed'),
                 $result->errorOutput(),
@@ -92,8 +90,9 @@ class YtDlpService
 
     /**
      * @param  list<string>  $args
+     * @param  array<string, mixed>  $logContext
      */
-    private function execute(array $args, int $timeout): ProcessResult
+    private function execute(array $args, int $timeout, array $logContext = []): ProcessResult
     {
         $command = $this->buildArgs($args);
 
@@ -101,7 +100,19 @@ class YtDlpService
             'command' => $this->formatCommandForLog($command),
         ]);
 
-        return Process::timeout($timeout)->run($command);
+        $result = Process::timeout($timeout)->run($command);
+
+        Log::log(
+            $result->successful() ? 'info' : 'warning',
+            'yt-dlp output',
+            array_merge($logContext, [
+                'exit_code' => $result->exitCode(),
+                'stdout' => $result->output(),
+                'stderr' => $result->errorOutput(),
+            ]),
+        );
+
+        return $result;
     }
 
     /**
