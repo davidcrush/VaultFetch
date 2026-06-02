@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Data\VideoMetadata;
 use App\Exceptions\YtDlpException;
+use Illuminate\Contracts\Process\ProcessResult;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -12,13 +13,12 @@ class YtDlpService
 {
     public function probe(string $url): VideoMetadata
     {
-        $result = Process::timeout(config('vaultfetch.probe_timeout'))
-            ->run($this->buildArgs([
-                '--no-warnings',
-                '--no-playlist',
-                '-J',
-                $url,
-            ]));
+        $result = $this->execute([
+            '--no-warnings',
+            '--no-playlist',
+            '-J',
+            $url,
+        ], config('vaultfetch.probe_timeout'));
 
         if (! $result->successful()) {
             Log::warning('yt-dlp probe failed', [
@@ -58,15 +58,14 @@ class YtDlpService
             $outputDir.'/'.$externalId.'.%(ext)s',
         );
 
-        $result = Process::timeout(config('vaultfetch.download_timeout'))
-            ->run($this->buildArgs([
-                '--no-warnings',
-                '--no-playlist',
-                '-f', config('vaultfetch.format'),
-                '--merge-output-format', config('vaultfetch.merge_output_format'),
-                '-o', $outputTemplate,
-                $url,
-            ]));
+        $result = $this->execute([
+            '--no-warnings',
+            '--no-playlist',
+            '-f', config('vaultfetch.format'),
+            '--merge-output-format', config('vaultfetch.merge_output_format'),
+            '-o', $outputTemplate,
+            $url,
+        ], config('vaultfetch.download_timeout'));
 
         if (! $result->successful()) {
             Log::warning('yt-dlp download failed', [
@@ -89,6 +88,69 @@ class YtDlpService
         $absolutePath = $files[0];
 
         return $outputDir.'/'.basename($absolutePath);
+    }
+
+    /**
+     * @param  list<string>  $args
+     */
+    private function execute(array $args, int $timeout): ProcessResult
+    {
+        $command = $this->buildArgs($args);
+
+        Log::info('yt-dlp command', [
+            'command' => $this->formatCommandForLog($command),
+        ]);
+
+        return Process::timeout($timeout)->run($command);
+    }
+
+    /**
+     * @param  list<string>  $command
+     */
+    private function formatCommandForLog(array $command): string
+    {
+        $redacted = [];
+
+        for ($i = 0; $i < count($command); $i++) {
+            if ($command[$i] === '--proxy' && isset($command[$i + 1])) {
+                $redacted[] = $command[$i];
+                $redacted[] = $this->redactProxyUrl($command[$i + 1]);
+                $i++;
+
+                continue;
+            }
+
+            $redacted[] = $command[$i];
+        }
+
+        return implode(' ', array_map(escapeshellarg(...), $redacted));
+    }
+
+    private function redactProxyUrl(string $proxy): string
+    {
+        $parts = parse_url($proxy);
+
+        if ($parts === false || ! isset($parts['pass'])) {
+            return $proxy;
+        }
+
+        $redacted = ($parts['scheme'] ?? 'http').'://';
+
+        if (isset($parts['user'])) {
+            $redacted .= $parts['user'].':***@';
+        }
+
+        $redacted .= $parts['host'] ?? '';
+
+        if (isset($parts['port'])) {
+            $redacted .= ':'.$parts['port'];
+        }
+
+        if (isset($parts['path']) && $parts['path'] !== '') {
+            $redacted .= $parts['path'];
+        }
+
+        return $redacted;
     }
 
     /**

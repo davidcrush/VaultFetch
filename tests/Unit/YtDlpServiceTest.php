@@ -5,6 +5,8 @@ namespace Tests\Unit;
 use App\Data\VideoMetadata;
 use App\Exceptions\YtDlpException;
 use App\Services\YtDlpService;
+use Illuminate\Log\Events\MessageLogged;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
@@ -99,5 +101,40 @@ class YtDlpServiceTest extends TestCase
             return in_array('--proxy', $command, true)
                 && in_array('socks5://127.0.0.1:1080', $command, true);
         });
+    }
+
+    public function test_probe_logs_command_with_redacted_proxy_password(): void
+    {
+        config(['vaultfetch.proxy' => 'http://proxyuser:secretpass@proxy.example:8080']);
+
+        $logged = [];
+        Log::listen(function (MessageLogged $event) use (&$logged): void {
+            $logged[] = [
+                'level' => $event->level,
+                'message' => $event->message,
+                'context' => $event->context,
+            ];
+        });
+
+        Process::fake([
+            '*' => Process::result(
+                output: json_encode([
+                    'id' => 'abc123xyz00',
+                    'title' => 'Sample Video',
+                    'duration' => 125,
+                ]),
+            ),
+        ]);
+
+        app(YtDlpService::class)->probe('https://www.youtube.com/watch?v=abc123xyz00');
+
+        $commandLog = collect($logged)->first(
+            fn (array $entry): bool => $entry['message'] === 'yt-dlp command',
+        );
+
+        $this->assertNotNull($commandLog);
+        $this->assertSame('info', $commandLog['level']);
+        $this->assertStringContainsString('http://proxyuser:***@proxy.example:8080', $commandLog['context']['command']);
+        $this->assertStringNotContainsString('secretpass', $commandLog['context']['command']);
     }
 }
