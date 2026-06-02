@@ -14,8 +14,8 @@ class YtDlpService
     public function probe(string $url): VideoMetadata
     {
         $result = $this->execute([
-            '--no-warnings',
-            '--no-playlist',
+            // '--no-warnings',
+            // '--no-playlist',
             '-J',
             $url,
         ], config('vaultfetch.probe_timeout'), ['url' => $url]);
